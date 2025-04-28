@@ -1,31 +1,57 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Problem } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import MonacoEditor from '@monaco-editor/react';
+
+const LANGUAGES = [
+  { label: 'Python', value: 'python' },
+  { label: 'JavaScript', value: 'javascript' },
+  { label: 'TypeScript', value: 'typescript' },
+  { label: 'Java', value: 'java' },
+  { label: 'C++', value: 'cpp' },
+  { label: 'C', value: 'c' },
+  { label: 'Go', value: 'go' },
+];
 
 interface SubmitModalProps {
   isOpen: boolean;
   onClose: () => void;
   problem: Problem;
+  initialData?: any;
+  isResubmission?: boolean;
 }
 
-export default function SubmitModal({ isOpen, onClose, problem }: SubmitModalProps) {
+export default function SubmitModal({ isOpen, onClose, problem, initialData, isResubmission }: SubmitModalProps) {
   const { user } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    code: '',
-    approach: '',
-    timeComplexity: '',
-    spaceComplexity: '',
+    code: initialData?.code || '',
+    approach: initialData?.approach || '',
+    timeComplexity: initialData?.timeComplexity || '',
+    spaceComplexity: initialData?.spaceComplexity || '',
+    language: initialData?.language || LANGUAGES[0].value,
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        code: initialData.code || '',
+        approach: initialData.approach || '',
+        timeComplexity: initialData.timeComplexity || '',
+        spaceComplexity: initialData.spaceComplexity || '',
+        language: initialData.language || LANGUAGES[0].value,
+      });
+    }
+  }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,21 +59,54 @@ export default function SubmitModal({ isOpen, onClose, problem }: SubmitModalPro
 
     setLoading(true);
     try {
-      // Create submission
-      const submissionRef = await addDoc(collection(db, 'submissions'), {
-        userId: user.uid,
-        problemId: problem.id,
+      let submissionId;
+      if (isResubmission && initialData?.id) {
+        // Update existing submission
+        submissionId = initialData.id;
+        await updateDoc(doc(db, 'submissions', submissionId), {
+          code: formData.code,
+          approach: formData.approach,
+          timeComplexity: formData.timeComplexity,
+          spaceComplexity: formData.spaceComplexity,
+          language: formData.language,
+          status: 'In Progress',
+          submittedAt: new Date().toISOString(),
+        });
+      } else {
+        // Create new submission
+        const submissionRef = await addDoc(collection(db, 'submissions'), {
+          userId: user.uid,
+          problemId: problem.id,
+          code: formData.code,
+          approach: formData.approach,
+          timeComplexity: formData.timeComplexity,
+          spaceComplexity: formData.spaceComplexity,
+          language: formData.language,
+          status: 'In Progress',
+          submittedAt: new Date().toISOString(),
+        });
+        submissionId = submissionRef.id;
+      }
+
+      // Trigger AI feedback API (fire-and-forget)
+      const feedbackPayload = {
         code: formData.code,
+        language: formData.language,
         approach: formData.approach,
-        timeComplexity: formData.timeComplexity,
-        spaceComplexity: formData.spaceComplexity,
-        status: 'In Progress',
-        submittedAt: new Date().toISOString(),
+        problemTitle: problem.title,
+        submissionId,
+      };
+      console.log('Sending to /api/feedback:', feedbackPayload);
+      fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feedbackPayload),
+      }).catch((err) => {
+        toast.error('Failed to trigger AI feedback.');
+        console.error('Feedback API error:', err);
       });
 
-      // TODO: Trigger AI analysis
-      // For now, just redirect to feedback page
-      router.push(`/feedback/${submissionRef.id}`);
+      router.push(`/feedback/${submissionId}`);
       toast.success('Solution submitted successfully!');
     } catch (error) {
       console.error('Error submitting solution:', error);
@@ -103,17 +162,40 @@ export default function SubmitModal({ isOpen, onClose, problem }: SubmitModalPro
 
                     <form onSubmit={handleSubmit} className="mt-6 space-y-6">
                       <div>
-                        <label htmlFor="code" className="block text-sm font-medium text-gray-300">
+                        <label htmlFor="language" className="block text-sm font-medium text-gray-300 mb-1">
+                          Language
+                        </label>
+                        <select
+                          id="language"
+                          className="block w-48 rounded-md border-gray-700 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm mb-2"
+                          value={formData.language}
+                          onChange={e => setFormData({ ...formData, language: e.target.value })}
+                        >
+                          {LANGUAGES.map(lang => (
+                            <option key={lang.value} value={lang.value}>{lang.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="code" className="block text-sm font-medium text-gray-300 mb-1">
                           Your Solution
                         </label>
-                        <textarea
-                          id="code"
-                          rows={10}
-                          className="mt-1 block w-full rounded-md border-gray-700 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                          value={formData.code}
-                          onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                          required
-                        />
+                        <div className="rounded-md overflow-hidden border border-gray-700 bg-gray-700">
+                          <MonacoEditor
+                            height="250px"
+                            defaultLanguage={formData.language}
+                            language={formData.language}
+                            theme="vs-dark"
+                            value={formData.code}
+                            onChange={value => setFormData({ ...formData, code: value || '' })}
+                            options={{
+                              minimap: { enabled: false },
+                              fontSize: 14,
+                              scrollBeyondLastLine: false,
+                              wordWrap: 'on',
+                            }}
+                          />
+                        </div>
                       </div>
 
                       <div>

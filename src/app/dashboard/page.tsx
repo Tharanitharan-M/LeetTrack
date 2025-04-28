@@ -18,26 +18,30 @@ export default function DashboardPage() {
 
   return (
     <Layout showLogo={true}>
-      <div className="space-y-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-          <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-lg">Dashboard</h1>
-          <div className="text-white text-lg font-medium">
-            Welcome back, <span className="text-white font-bold">{user?.displayName}</span>!
-          </div>
+      <div className="pt-8 pb-4 bg-black/90 w-full text-center border-b border-gray-800 mb-8">
+        <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
+          <span className="block">Your DSA Dashboard</span>
+          <span className="block text-blue-500 bg-clip-text">Progress & Practice</span>
+        </h1>
+        <div className="mt-2 text-lg text-gray-300">
+          Welcome back, <span className="text-white font-bold">{user?.displayName}</span>!
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-black/90 to-gray-900/80 border border-gray-800 rounded-2xl shadow-2xl p-6 text-white">
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="bg-black/80 rounded-2xl shadow-2xl p-6">
             <DashboardStats />
           </div>
         </div>
-
-        <div className="bg-gradient-to-br from-black/90 to-gray-900/80 border border-gray-800 rounded-2xl shadow-2xl p-6 text-white">
-          <FiltersBar filters={filters} setFilters={setFilters} />
+        <div className="mb-8">
+          <div className="bg-black/80 rounded-2xl shadow-2xl p-6">
+            <FiltersBar filters={filters} setFilters={setFilters} useDropdowns />
+          </div>
         </div>
-
-        <div className="bg-gradient-to-br from-black/90 to-gray-900/80 border border-gray-800 rounded-2xl shadow-2xl p-6 text-white">
-          <ProblemsTable filters={filters} />
+        <div>
+          <div className="bg-black/80 rounded-2xl shadow-2xl p-6">
+            <ProblemsTable filters={filters} />
+          </div>
         </div>
       </div>
     </Layout>

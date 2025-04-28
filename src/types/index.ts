@@ -12,7 +12,15 @@ export interface Problem {
   difficulty: 'Easy' | 'Medium' | 'Hard';
   topic: string;
   companies: string[];
+  acceptanceRate: string;
   leetcodeUrl: string;
+  description?: string;
+  constraints?: string[];
+  examples?: {
+    input: string;
+    output: string;
+    explanation?: string;
+  }[];
 }
 
 export interface Submission {
@@ -28,15 +36,14 @@ export interface Submission {
 }
 
 export interface Feedback {
-  id: string;
+  id?: string;
   submissionId: string;
   feedbackText: string;
   optimizedCode: string;
   patternDetected: string;
   companiesFound: string[];
-  patternSteps: {
-    step: number;
-    whatToThinkAbout: string;
-    why: string;
+  patternThinkingSteps: {
+    title: string;
+    description: string;
   }[];
 } 

@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { problems } from '@/problems';
 
 interface Stats {
   totalSolved: number;
@@ -38,16 +39,29 @@ export default function DashboardStats() {
         const solvedProblems = new Set<string>();
         const topicCount: { [key: string]: { solved: number; total: number } } = {};
 
+        // Create a map for quick problemId -> topic lookup
+        const problemIdToTopic: { [key: string]: string } = {};
+        problems.forEach((problem) => {
+          problemIdToTopic[problem.id] = problem.topic;
+        });
+
+        // Track which problems have been counted as solved per topic
+        const countedProblems = new Set<string>();
+
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           if (data.status === 'Solved') {
             solvedProblems.add(data.problemId);
-            
-            // Update topic progress
-            if (!topicCount[data.topic]) {
-              topicCount[data.topic] = { solved: 0, total: 0 };
+            const topic = problemIdToTopic[data.problemId];
+            if (!topic) return; // skip if topic not found
+            // Only count the first solved submission per problem
+            const uniqueKey = `${topic}::${data.problemId}`;
+            if (countedProblems.has(uniqueKey)) return;
+            countedProblems.add(uniqueKey);
+            if (!topicCount[topic]) {
+              topicCount[topic] = { solved: 0, total: 0 };
             }
-            topicCount[data.topic].solved++;
+            topicCount[topic].solved++;
           }
         });
 

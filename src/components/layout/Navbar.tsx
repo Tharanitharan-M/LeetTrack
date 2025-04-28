@@ -10,7 +10,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ showLogo = true }: NavbarProps) {
-  const { user, signInWithGoogle } = useAuth();
+  const { user, signInWithGoogle, signOut } = useAuth();
   const router = useRouter();
 
   return (
@@ -19,7 +19,9 @@ export default function Navbar({ showLogo = true }: NavbarProps) {
         {/* Logo (conditionally rendered) */}
         {showLogo ? (
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}> 
-            <span className="text-2xl font-extrabold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent tracking-tight">LeetTrack</span>
+            <span className="text-2xl font-extrabold tracking-tight">
+              <span className="text-white">Leet</span><span className="text-blue-500">Track</span>
+            </span>
           </div>
         ) : <div />}
         {/* Actions */}
@@ -32,10 +34,10 @@ export default function Navbar({ showLogo = true }: NavbarProps) {
               </Avatar>
               <Button
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md shadow-lg"
-                onClick={() => router.push("/dashboard")}
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-md shadow-lg"
+                onClick={signOut}
               >
-                Start Practicing
+                Logout
               </Button>
             </>
           ) : (

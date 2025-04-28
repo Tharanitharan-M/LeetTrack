@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { Problem } from '@/types';
+import { problems as allProblems } from '@/problems';
+import { Problem, Submission } from '@/types';
 import SubmitModal from './SubmitModal';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface ProblemsTableProps {
   filters: {
@@ -16,175 +17,150 @@ interface ProblemsTableProps {
   };
 }
 
+const getUniqueTopics = (problems: Problem[]) =>
+  Array.from(new Set(problems.map((p) => p.topic)));
+
 export default function ProblemsTable({ filters }: ProblemsTableProps) {
   const { user } = useAuth();
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [openTopic, setOpenTopic] = useState<string | null>(null);
+  const [userSubmissions, setUserSubmissions] = useState<Submission[]>([]);
 
   useEffect(() => {
-    const fetchProblems = async () => {
-      if (!user) return;
-
-      try {
-        // TODO: Replace with actual Firestore query
-        // For now, using dummy data
-        const dummyProblems: Problem[] = [
-          {
-            id: '1',
-            title: 'Two Sum',
-            difficulty: 'Easy',
-            topic: 'Arrays',
-            companies: ['Google', 'Amazon', 'Microsoft'],
-            leetcodeUrl: 'https://leetcode.com/problems/two-sum',
-          },
-          {
-            id: '2',
-            title: 'Add Two Numbers',
-            difficulty: 'Medium',
-            topic: 'Linked Lists',
-            companies: ['Amazon', 'Microsoft'],
-            leetcodeUrl: 'https://leetcode.com/problems/add-two-numbers',
-          },
-          // Add more dummy problems...
-        ];
-
-        // Apply filters
-        let filteredProblems = dummyProblems;
-
-        if (filters.difficulty !== 'all') {
-          filteredProblems = filteredProblems.filter(
-            (p) => p.difficulty === filters.difficulty
-          );
-        }
-
-        if (filters.status !== 'all') {
-          // TODO: Implement status filtering based on user's submissions
-        }
-
-        if (filters.companies.length > 0) {
-          filteredProblems = filteredProblems.filter((p) =>
-            p.companies.some((c) => filters.companies.includes(c))
-          );
-        }
-
-        if (filters.topics.length > 0) {
-          filteredProblems = filteredProblems.filter((p) =>
-            filters.topics.includes(p.topic)
-          );
-        }
-
-        setProblems(filteredProblems);
-      } catch (error) {
-        console.error('Error fetching problems:', error);
-      } finally {
-        setLoading(false);
-      }
+    if (!user) return;
+    const fetchSubmissions = async () => {
+      const q = query(collection(db, 'submissions'), where('userId', '==', user.uid));
+      const querySnapshot = await getDocs(q);
+      const submissions: Submission[] = [];
+      querySnapshot.forEach((doc) => {
+        submissions.push({ id: doc.id, ...doc.data() } as Submission);
+      });
+      setUserSubmissions(submissions);
     };
+    fetchSubmissions();
+  }, [user]);
 
-    fetchProblems();
-  }, [user, filters]);
+  // Apply difficulty and companies filters (already present)
+  let filteredProblems = allProblems;
+  if (filters.difficulty !== 'all') {
+    filteredProblems = filteredProblems.filter(
+      (p) => p.difficulty === filters.difficulty
+    );
+  }
+  if (filters.companies.length > 0) {
+    filteredProblems = filteredProblems.filter((p) =>
+      p.companies.some((c) => filters.companies.includes(c))
+    );
+  }
+
+  // Apply topics filter
+  if (filters.topics.length > 0) {
+    filteredProblems = filteredProblems.filter((p) =>
+      filters.topics.includes(p.topic)
+    );
+  }
+
+  // Apply status filter
+  if (filters.status !== 'all') {
+    filteredProblems = filteredProblems.filter((p) => {
+      const userProblemSubmissions = userSubmissions.filter(
+        (s) => s.problemId === p.id
+      );
+      if (filters.status === 'Solved') {
+        return userProblemSubmissions.some((s) => s.status === 'Solved');
+      } else if (filters.status === 'In Progress') {
+        return userProblemSubmissions.some((s) => s.status === 'In Progress');
+      } else if (filters.status === 'Unsolved') {
+        return userProblemSubmissions.length === 0;
+      }
+      return true;
+    });
+  }
+
+  const topics = getUniqueTopics(allProblems);
 
   const handleSubmitClick = (problem: Problem) => {
     setSelectedProblem(problem);
     setIsSubmitModalOpen(true);
   };
 
-  if (loading) {
-    return (
-      <div className="bg-gray-800 rounded-lg p-4">
-        <div className="animate-pulse space-y-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-12 bg-gray-700 rounded"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="bg-gray-800 rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-700">
-          <thead className="bg-gray-700">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Problem
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Difficulty
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Topic
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Companies
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-700">
-            {problems.map((problem) => (
-              <tr key={problem.id} className="hover:bg-gray-700">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <a
-                    href={problem.leetcodeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white hover:text-blue-400"
-                  >
-                    {problem.title}
-                  </a>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      problem.difficulty === 'Easy'
-                        ? 'bg-green-100 text-green-800'
-                        : problem.difficulty === 'Medium'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {problem.difficulty}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-300">
-                  {problem.topic}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex flex-wrap gap-1">
-                    {problem.companies.map((company) => (
-                      <span
-                        key={company}
-                        className="px-2 py-1 text-xs bg-gray-700 text-gray-300 rounded-full"
-                      >
-                        {company}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-gray-300">Unsolved</span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
-                  <button
-                    onClick={() => handleSubmitClick(problem)}
-                    className="text-blue-400 hover:text-blue-300"
-                  >
-                    Submit Solution
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex flex-col gap-3">
+        {topics.map((topic) => {
+          const topicProblems = filteredProblems.filter((p) => p.topic === topic);
+          if (topicProblems.length === 0) return null;
+          return (
+            <div key={topic} className="bg-black/80 rounded-2xl shadow-xl border border-gray-800">
+              <button
+                className={`w-full flex justify-between items-center px-6 py-4 text-lg font-semibold text-white focus:outline-none ${openTopic === topic ? 'border-b border-gray-700' : ''}`}
+                onClick={() => setOpenTopic(openTopic === topic ? null : topic)}
+              >
+                <span>{topic}</span>
+                <span className="text-sm text-gray-400">({topicProblems.length}) {openTopic === topic ? '▲' : '▼'}</span>
+              </button>
+              {openTopic === topic && (
+                <div className="divide-y divide-gray-800">
+                  {topicProblems.map((problem) => {
+                    // Find the latest solved submission for this problem
+                    const solvedSubmissions = userSubmissions
+                      .filter((s) => s.problemId === problem.id && s.status === 'Solved')
+                      .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+                    const latestSolved = solvedSubmissions[0];
+                    return (
+                      <div key={problem.id} className="flex flex-col md:flex-row md:items-center justify-between px-6 py-3 gap-2 hover:bg-gray-900/60 transition">
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 flex-1">
+                          <a
+                            href={problem.leetcodeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-white hover:text-blue-400 font-medium text-base flex items-center gap-1"
+                          >
+                            {problem.title}
+                          </a>
+                          <span
+                            className={`px-2 py-1 text-xs font-semibold rounded-full ml-2
+                              ${problem.difficulty === 'Easy' ? 'bg-green-700 text-green-200' :
+                                problem.difficulty === 'Medium' ? 'bg-yellow-700 text-yellow-200' :
+                                'bg-red-700 text-red-200'}`}
+                          >
+                            {problem.difficulty}
+                          </span>
+                        </div>
+                        <div className="flex gap-2 mt-2 md:mt-0">
+                          {latestSolved ? (
+                            <a
+                              href={`/feedback/${latestSolved.id}`}
+                              className="px-3 py-1 rounded-lg bg-green-700 text-white text-xs font-semibold hover:bg-green-600 transition"
+                            >
+                              View Feedback
+                            </a>
+                          ) : (
+                            <button
+                              onClick={() => handleSubmitClick(problem)}
+                              className="px-3 py-1 rounded-lg bg-blue-700 text-white text-xs font-semibold hover:bg-blue-600 transition"
+                            >
+                              Submit Solution
+                            </button>
+                          )}
+                          <a
+                            href={problem.leetcodeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1 rounded-lg bg-yellow-500 text-black text-xs font-semibold hover:bg-yellow-400 transition flex items-center gap-1"
+                          >
+                            LeetCode
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {selectedProblem && (

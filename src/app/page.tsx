@@ -6,7 +6,7 @@ import Navbar from '@/components/layout/Navbar';
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 relative overflow-x-hidden">
-      <Navbar showLogo={false} />
+      <Navbar showLogo={true} />
       <main className="flex flex-col items-center justify-center flex-1 w-full pt-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center">
