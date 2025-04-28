@@ -205,12 +205,18 @@ export default function FeedbackPage() {
           </div>
         </div>
         {/* Resubmit Button */}
-        <div className="flex justify-end mt-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-12">
           <button
-            className="px-4 py-2 rounded-lg bg-blue-700 text-white font-semibold hover:bg-blue-600 transition"
+            className="px-6 py-3 rounded-lg border border-blue-600 text-blue-600 bg-transparent font-semibold text-lg shadow hover:bg-blue-50/10 transition w-full sm:w-auto"
             onClick={() => setIsResubmitOpen(true)}
           >
             Resubmit
+          </button>
+          <button
+            className="px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold text-lg shadow-lg hover:bg-blue-700 transition w-full sm:w-auto"
+            onClick={() => window.location.href = '/dashboard'}
+          >
+            Back to Dashboard
           </button>
         </div>
         {/* Resubmit Modal */}

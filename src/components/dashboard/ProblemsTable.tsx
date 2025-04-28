@@ -7,6 +7,7 @@ import { Problem, Submission } from '@/types';
 import SubmitModal from './SubmitModal';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
 interface ProblemsTableProps {
   filters: {
@@ -108,17 +109,24 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
                       .filter((s) => s.problemId === problem.id && s.status === 'Solved')
                       .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
                     const latestSolved = solvedSubmissions[0];
+                    const isSolved = !!latestSolved;
                     return (
-                      <div key={problem.id} className="flex flex-col md:flex-row md:items-center justify-between px-6 py-3 gap-2 hover:bg-gray-900/60 transition">
+                      <div
+                        key={problem.id}
+                        className={`flex flex-col md:flex-row md:items-center justify-between px-6 py-3 gap-2 hover:bg-gray-900/60 transition ${isSolved ? 'bg-green-900/30' : ''}`}
+                      >
                         <div className="flex flex-col md:flex-row md:items-center gap-2 flex-1">
-                          <a
-                            href={problem.leetcodeUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-white hover:text-blue-400 font-medium text-base flex items-center gap-1"
-                          >
-                            {problem.title}
-                          </a>
+                          <span className="flex items-center gap-2">
+                            {isSolved && <CheckCircleIcon className="h-5 w-5 text-green-500" />}
+                            <a
+                              href={problem.leetcodeUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`font-medium text-base flex items-center gap-1 ${isSolved ? 'text-green-300' : 'text-white hover:text-blue-400'}`}
+                            >
+                              {problem.title}
+                            </a>
+                          </span>
                           <span
                             className={`px-2 py-1 text-xs font-semibold rounded-full ml-2
                               ${problem.difficulty === 'Easy' ? 'bg-green-700 text-green-200' :
@@ -129,7 +137,7 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
                           </span>
                         </div>
                         <div className="flex gap-2 mt-2 md:mt-0">
-                          {latestSolved ? (
+                          {isSolved ? (
                             <a
                               href={`/feedback/${latestSolved.id}`}
                               className="px-3 py-1 rounded-lg bg-green-700 text-white text-xs font-semibold hover:bg-green-600 transition"

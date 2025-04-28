@@ -2,6 +2,16 @@
 
 LeetTrack is a comprehensive DSA preparation platform that helps you track your progress and get AI-powered feedback on your solutions.
 
+## What's New
+
+- ✨ Modern, responsive UI/UX throughout the app
+- 🟢 Visual cues for solved/unsolved problems (checkmarks, row highlights)
+- 📊 Dashboard with progress bars, streaks, and topic breakdown
+- 🧠 Feedback page with actionable pattern thinking steps (accordion-ready)
+- 🛠️ Enhanced filters for difficulty, status, company, and topic
+- 🔄 Action bar on feedback page: Resubmit & Back to Dashboard
+- 🌙 Improved dark mode and accessibility
+
 ## Features
 
 - Google Authentication
@@ -10,6 +20,10 @@ LeetTrack is a comprehensive DSA preparation platform that helps you track your 
 - Pattern detection and optimization suggestions
 - Company-specific problem tracking
 - Daily streak tracking
+- Modern dashboard with progress bars and topic stats
+- Visual solved/unsolved indicators in problems table
+- Accordion-style pattern thinking steps in feedback
+- Responsive, mobile-friendly design
 
 ## Tech Stack
 
