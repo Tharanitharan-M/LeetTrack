@@ -1,5 +1,6 @@
 "use client";
 
+import { User as FirebaseUser } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";

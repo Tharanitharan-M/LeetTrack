@@ -2,8 +2,28 @@ export interface User {
   uid: string;
   email: string;
   displayName: string;
+  photoURL?: string;
+  createdAt: Date;
+  lastLoginAt: Date;
   streakCount: number;
-  lastSolvedDate: string | null;
+  lastSolvedDate: Date | null;
+  totalSolved: number;
+  inProgress: number;
+  unsolved: number;
+  completionPercentage: number;
+  topicProgress: {
+    [key: string]: {
+      solved: number;
+      total: number;
+    };
+  };
+  preferences: {
+    theme: 'light' | 'dark' | 'system';
+    difficulty: string[];
+    topics: string[];
+    sortBy: string;
+    sortOrder: 'asc' | 'desc';
+  };
 }
 
 export interface Problem {
