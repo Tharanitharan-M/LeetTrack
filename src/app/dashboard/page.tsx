@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/layout/Layout';
-import DashboardStats from '@/components/dashboard/DashboardStats';
+import ProgressStats from '@/components/dashboard/ProgressStats';
 import ProblemsTable from '@/components/dashboard/ProblemsTable';
 import FiltersBar from '@/components/dashboard/FiltersBar';
 import { useState } from 'react';
@@ -29,9 +29,7 @@ export default function DashboardPage() {
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <div className="bg-black/80 rounded-2xl shadow-2xl p-6">
-            <DashboardStats />
-          </div>
+          <ProgressStats />
         </div>
         <div className="mb-8">
           <div className="bg-black/80 rounded-2xl shadow-2xl p-6">

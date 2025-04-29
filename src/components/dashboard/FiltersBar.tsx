@@ -2,7 +2,7 @@
 
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { problems } from '@/problems';
 
 interface FiltersBarProps {
@@ -35,7 +35,7 @@ export default function FiltersBar({ filters, setFilters, useDropdowns }: Filter
             <Listbox.Button className="relative w-full cursor-pointer rounded-lg bg-gray-700 py-2 pl-3 pr-10 text-left text-white focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500">
               <span className="block truncate">Difficulty: {filters.difficulty}</span>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                <ChevronsUpDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
               </span>
             </Listbox.Button>
             <Transition
@@ -62,7 +62,7 @@ export default function FiltersBar({ filters, setFilters, useDropdowns }: Filter
                         </span>
                         {selected ? (
                           <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-white">
-                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                            <Check className="h-5 w-5" aria-hidden="true" />
                           </span>
                         ) : null}
                       </>
@@ -80,7 +80,7 @@ export default function FiltersBar({ filters, setFilters, useDropdowns }: Filter
             <Listbox.Button className="relative w-full cursor-pointer rounded-lg bg-gray-700 py-2 pl-3 pr-10 text-left text-white focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500">
               <span className="block truncate">Status: {filters.status}</span>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                <ChevronsUpDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
               </span>
             </Listbox.Button>
             <Transition
@@ -107,7 +107,7 @@ export default function FiltersBar({ filters, setFilters, useDropdowns }: Filter
                         </span>
                         {selected ? (
                           <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-white">
-                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                            <Check className="h-5 w-5" aria-hidden="true" />
                           </span>
                         ) : null}
                       </>
@@ -126,7 +126,7 @@ export default function FiltersBar({ filters, setFilters, useDropdowns }: Filter
               <Listbox.Button className="relative w-full cursor-pointer rounded-lg bg-gray-700 py-2 pl-3 pr-10 text-left text-white focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500">
                 <span className="block truncate">{filters.companies.length > 0 ? filters.companies.join(', ') : 'Companies'}</span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                  <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  <ChevronsUpDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </span>
               </Listbox.Button>
               <Transition
@@ -151,7 +151,7 @@ export default function FiltersBar({ filters, setFilters, useDropdowns }: Filter
                           <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>{company}</span>
                           {selected ? (
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-white">
-                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                              <Check className="h-5 w-5" aria-hidden="true" />
                             </span>
                           ) : null}
                         </>
@@ -191,7 +191,7 @@ export default function FiltersBar({ filters, setFilters, useDropdowns }: Filter
             <Listbox.Button className="relative w-full cursor-pointer rounded-lg bg-gray-700 py-2 pl-3 pr-10 text-left text-white focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500">
               <span className="block truncate">Topic: {filters.topics[0] || 'all'}</span>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                <ChevronsUpDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
               </span>
             </Listbox.Button>
             <Transition
@@ -215,7 +215,7 @@ export default function FiltersBar({ filters, setFilters, useDropdowns }: Filter
                       <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>All</span>
                       {selected ? (
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-white">
-                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          <Check className="h-5 w-5" aria-hidden="true" />
                         </span>
                       ) : null}
                     </>
@@ -236,7 +236,7 @@ export default function FiltersBar({ filters, setFilters, useDropdowns }: Filter
                         <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>{topic}</span>
                         {selected ? (
                           <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-white">
-                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                            <Check className="h-5 w-5" aria-hidden="true" />
                           </span>
                         ) : null}
                       </>

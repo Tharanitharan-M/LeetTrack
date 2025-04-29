@@ -7,7 +7,7 @@ import { Problem, Submission } from '@/types';
 import SubmitModal from './SubmitModal';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { CheckCircle } from 'lucide-react';
 
 interface ProblemsTableProps {
   filters: {
@@ -27,6 +27,7 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [openTopic, setOpenTopic] = useState<string | null>(null);
   const [userSubmissions, setUserSubmissions] = useState<Submission[]>([]);
+  const [topicProgress, setTopicProgress] = useState<{ [key: string]: { solved: number; total: number } }>({});
 
   useEffect(() => {
     if (!user) return;
@@ -38,6 +39,26 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
         submissions.push({ id: doc.id, ...doc.data() } as Submission);
       });
       setUserSubmissions(submissions);
+
+      // Calculate progress for each topic
+      const progress: { [key: string]: { solved: number; total: number } } = {};
+      const solvedProblems = new Set(
+        submissions
+          .filter(s => s.status === 'Solved')
+          .map(s => s.problemId)
+      );
+
+      // Initialize progress for each topic
+      topics.forEach(topic => {
+        const topicProblems = allProblems.filter(p => p.topic === topic);
+        const solvedCount = topicProblems.filter(p => solvedProblems.has(p.id)).length;
+        progress[topic] = {
+          solved: solvedCount,
+          total: topicProblems.length
+        };
+      });
+
+      setTopicProgress(progress);
     };
     fetchSubmissions();
   }, [user]);
@@ -92,6 +113,10 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
         {topics.map((topic) => {
           const topicProblems = filteredProblems.filter((p) => p.topic === topic);
           if (topicProblems.length === 0) return null;
+          
+          const progress = topicProgress[topic] || { solved: 0, total: 0 };
+          const progressPercentage = (progress.solved / progress.total) * 100;
+          
           return (
             <div key={topic} className="bg-black/80 rounded-2xl shadow-xl border border-gray-800">
               <button
@@ -99,7 +124,20 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
                 onClick={() => setOpenTopic(openTopic === topic ? null : topic)}
               >
                 <span>{topic}</span>
-                <span className="text-sm text-gray-400">({topicProblems.length}) {openTopic === topic ? '▲' : '▼'}</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 text-sm font-normal">
+                    <div className="h-2 w-20 bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-green-500 transition-all duration-500"
+                        style={{ width: `${progressPercentage}%` }}
+                      />
+                    </div>
+                    <span className="text-gray-400 min-w-[60px] text-right">
+                      {progress.solved}/{progress.total}
+                    </span>
+                  </div>
+                  <span className="text-gray-400">{openTopic === topic ? '▲' : '▼'}</span>
+                </div>
               </button>
               {openTopic === topic && (
                 <div className="divide-y divide-gray-800">
@@ -117,7 +155,7 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
                       >
                         <div className="flex flex-col md:flex-row md:items-center gap-2 flex-1">
                           <span className="flex items-center gap-2">
-                            {isSolved && <CheckCircleIcon className="h-5 w-5 text-green-500" />}
+                            {isSolved && <CheckCircle className="h-5 w-5 text-green-500" />}
                             <a
                               href={problem.leetcodeUrl}
                               target="_blank"
