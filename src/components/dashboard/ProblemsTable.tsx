@@ -29,6 +29,8 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
   const [userSubmissions, setUserSubmissions] = useState<Submission[]>([]);
   const [topicProgress, setTopicProgress] = useState<{ [key: string]: { solved: number; total: number } }>({});
 
+  const topics = getUniqueTopics(allProblems);
+
   useEffect(() => {
     if (!user) return;
     const fetchSubmissions = async () => {
@@ -99,8 +101,6 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
       return true;
     });
   }
-
-  const topics = getUniqueTopics(allProblems);
 
   const handleSubmitClick = (problem: Problem) => {
     setSelectedProblem(problem);
