@@ -89,7 +89,7 @@ export default function DashboardStats() {
 
         setStats({
           totalSolved: solvedProblems.size,
-          streakCount: user.streakCount,
+          streakCount: user.streakCount ?? 0,
           topicProgress: topicCount,
         });
       } catch (error) {
