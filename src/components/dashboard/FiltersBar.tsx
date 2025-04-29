@@ -12,7 +12,7 @@ interface FiltersBarProps {
     companies: string[];
     topics: string[];
   };
-  setFilters: (filters: any) => void;
+  setFilters: (filters: FiltersBarProps['filters']) => void;
   useDropdowns?: boolean;
 }
 
@@ -22,7 +22,7 @@ const companies = Array.from(new Set(problems.flatMap(p => p.companies))).sort((
 const topics = Array.from(new Set(problems.map(p => p.topic))).sort((a, b) => a.localeCompare(b));
 
 export default function FiltersBar({ filters, setFilters, useDropdowns }: FiltersBarProps) {
-  const updateFilter = (key: string, value: any) => {
+  const updateFilter = (key: keyof FiltersBarProps['filters'], value: string | string[]) => {
     setFilters({ ...filters, [key]: value });
   };
 

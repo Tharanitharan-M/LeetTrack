@@ -61,7 +61,7 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
       setTopicProgress(progress);
     };
     fetchSubmissions();
-  }, [user]);
+  }, [user, topics]);
 
   // Apply difficulty and companies filters (already present)
   let filteredProblems = allProblems;

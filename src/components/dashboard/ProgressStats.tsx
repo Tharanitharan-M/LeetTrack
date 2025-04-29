@@ -11,7 +11,6 @@ import { Flame } from 'lucide-react';
 
 export default function ProgressStats() {
   const { user } = useAuth();
-  const [userSubmissions, setUserSubmissions] = useState<Submission[]>([]);
   const [stats, setStats] = useState({
     totalProblems: problems.length,
     solvedProblems: 0,
@@ -33,7 +32,6 @@ export default function ProgressStats() {
       querySnapshot.forEach((doc) => {
         submissions.push({ id: doc.id, ...doc.data() } as Submission);
       });
-      setUserSubmissions(submissions);
       
       // Calculate stats
       const solvedProblemIds = new Set(
