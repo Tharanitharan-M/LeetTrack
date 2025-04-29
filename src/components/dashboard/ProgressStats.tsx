@@ -47,7 +47,7 @@ export default function ProgressStats() {
       setStats({
         totalProblems: problems.length,
         solvedProblems: solvedCount,
-        streak: user.streakCount,
+        streak: user.streakCount ?? 0,
         unsolvedProblems: unsolvedCount,
         completionPercentage,
       });
