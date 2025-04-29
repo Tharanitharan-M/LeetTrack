@@ -17,6 +17,10 @@ interface Stats {
   };
 }
 
+interface TopicTotals {
+  [key: string]: number;
+}
+
 export default function DashboardStats() {
   const { user } = useAuth();
   const [stats, setStats] = useState<Stats>({
@@ -67,7 +71,7 @@ export default function DashboardStats() {
 
         // TODO: Fetch total problems per topic from problems collection
         // For now, using dummy data
-        const dummyTopicTotals = {
+        const dummyTopicTotals: TopicTotals = {
           'Arrays': 14,
           'Strings': 12,
           'Linked Lists': 8,
