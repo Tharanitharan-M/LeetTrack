@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             topicProgress: {},
             preferences: {
               theme: 'system',
-              difficulty: 'all',
+              difficulty: ['all'],
               topics: [],
               sortBy: 'title',
               sortOrder: 'asc'
@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           topicProgress: {},
           preferences: {
             theme: 'system',
-            difficulty: 'all',
+            difficulty: ['all'],
             topics: [],
             sortBy: 'title',
             sortOrder: 'asc'
