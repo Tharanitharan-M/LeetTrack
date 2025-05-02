@@ -8,8 +8,10 @@ interface AddProblemModalProps {
   onAdd: (problem: Omit<Problem, 'id'>) => void;
 }
 
+type FormData = Omit<Problem, 'id'>;
+
 export default function AddProblemModal({ isOpen, onClose, onAdd }: AddProblemModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     difficulty: 'Easy',
     topic: '',
