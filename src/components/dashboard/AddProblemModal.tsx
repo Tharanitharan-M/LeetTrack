@@ -15,6 +15,7 @@ export default function AddProblemModal({ isOpen, onClose, onAdd }: AddProblemMo
     topic: '',
     companies: [] as string[],
     leetcodeUrl: '',
+    acceptanceRate: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -26,6 +27,7 @@ export default function AddProblemModal({ isOpen, onClose, onAdd }: AddProblemMo
       topic: '',
       companies: [],
       leetcodeUrl: '',
+      acceptanceRate: '',
     });
     onClose();
   };
@@ -100,6 +102,20 @@ export default function AddProblemModal({ isOpen, onClose, onAdd }: AddProblemMo
               className="mt-1 block w-full rounded-md border-gray-700 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               value={formData.leetcodeUrl}
               onChange={(e) => setFormData({ ...formData, leetcodeUrl: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="acceptanceRate" className="block text-sm font-medium text-gray-300">
+              Acceptance Rate
+            </label>
+            <input
+              type="text"
+              id="acceptanceRate"
+              className="mt-1 block w-full rounded-md border-gray-700 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              value={formData.acceptanceRate}
+              onChange={(e) => setFormData({ ...formData, acceptanceRate: e.target.value })}
               required
             />
           </div>
