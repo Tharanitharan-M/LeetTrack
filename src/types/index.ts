@@ -66,4 +66,13 @@ export interface Feedback {
     title: string;
     description: string;
   }[];
+  aiThoughtProcess?: {
+    codeAnalysis: string;
+    approachEvaluation: string;
+    timeComplexityAnalysis: string;
+    alternativeApproaches: {
+      approach: string;
+      tradeoffs: string;
+    }[];
+  };
 } 

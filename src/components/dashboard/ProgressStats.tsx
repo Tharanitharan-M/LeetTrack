@@ -33,14 +33,20 @@ export default function ProgressStats() {
         submissions.push({ id: doc.id, ...doc.data() } as Submission);
       });
       
-      // Calculate stats
-      const solvedProblemIds = new Set(
-        submissions
-          .filter(s => s.status === 'Solved')
-          .map(s => s.problemId)
-      );
+      // Get only the latest submission per problem
+      const latestSubmissions = new Map();
+      submissions.forEach(submission => {
+        const existingSubmission = latestSubmissions.get(submission.problemId);
+        if (!existingSubmission || new Date(submission.submittedAt) > new Date(existingSubmission.submittedAt)) {
+          latestSubmissions.set(submission.problemId, submission);
+        }
+      });
       
-      const solvedCount = solvedProblemIds.size;
+      // Calculate stats based on latest submissions
+      const solvedCount = Array.from(latestSubmissions.values())
+        .filter(s => s.status === 'Solved')
+        .length;
+      
       const unsolvedCount = problems.length - solvedCount;
       const completionPercentage = (solvedCount / problems.length) * 100;
       

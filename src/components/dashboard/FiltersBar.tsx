@@ -2,7 +2,7 @@
 
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, Search } from 'lucide-react';
 import { problems } from '@/problems';
 
 interface FiltersBarProps {
@@ -11,6 +11,7 @@ interface FiltersBarProps {
     status: string;
     companies: string[];
     topics: string[];
+    search: string;
   };
   setFilters: (filters: FiltersBarProps['filters']) => void;
   useDropdowns?: boolean;
@@ -27,7 +28,21 @@ export default function FiltersBar({ filters, setFilters, useDropdowns }: Filter
   };
 
   return (
-    <div className="bg-transparent">
+    <div className="bg-transparent space-y-4">
+      {/* Search Bar */}
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-5 w-5 text-gray-400" />
+        </div>
+        <input
+          type="text"
+          value={filters.search}
+          onChange={(e) => updateFilter('search', e.target.value)}
+          className="block w-full pl-10 pr-3 py-2 rounded-lg bg-gray-700 border-transparent focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
+          placeholder="Search problems by name..."
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Difficulty Filter */}
         <Listbox value={filters.difficulty} onChange={(value) => updateFilter('difficulty', value)}>

@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { problems as allProblems } from '@/problems';
 import { Problem, Submission } from '@/types';
 import SubmitModal from './SubmitModal';
+import AddProblemModal from './AddProblemModal';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Plus, Trash2 } from 'lucide-react';
 
 interface ProblemsTableProps {
   filters: {
@@ -15,21 +15,54 @@ interface ProblemsTableProps {
     status: string;
     companies: string[];
     topics: string[];
+    search: string;
   };
+  onDeleteProblem?: (problemId: string) => void;
+  onAddProblem?: (problem: Omit<Problem, 'id'>) => void;
+  problems: Problem[];
 }
 
-const getUniqueTopics = (problems: Problem[]) =>
-  Array.from(new Set(problems.map((p) => p.topic)));
+const topicOrder = [
+  'Arrays & Hashing',
+  'Two Pointers',
+  'Sliding Window',
+  'Stack',
+  'Binary Search',
+  'Linked List',
+  'Trees',
+  'Tries',
+  'Heap',
+  'Graphs',
+  'Advanced Graphs',
+  '1-D Dynamic Programming',
+  '2-D Dynamic Programming',
+  'Greedy',
+  'Intervals',
+  'Math & Geometry',
+  'Bit Manipulation'
+];
 
-export default function ProblemsTable({ filters }: ProblemsTableProps) {
+const difficultyOrder = {
+  'Easy': 0,
+  'Medium': 1,
+  'Hard': 2
+};
+
+const getOrderedTopics = (problems: Problem[]) => {
+  const availableTopics = new Set(problems.map(p => p.topic));
+  return topicOrder.filter(topic => availableTopics.has(topic));
+};
+
+export default function ProblemsTable({ filters, onDeleteProblem, onAddProblem, problems }: ProblemsTableProps) {
   const { user } = useAuth();
   const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [openTopic, setOpenTopic] = useState<string | null>(null);
   const [userSubmissions, setUserSubmissions] = useState<Submission[]>([]);
   const [topicProgress, setTopicProgress] = useState<{ [key: string]: { solved: number; total: number } }>({});
 
-  const topics = getUniqueTopics(allProblems);
+  const topics = getOrderedTopics(problems);
 
   useEffect(() => {
     if (!user) return;
@@ -52,7 +85,7 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
 
       // Initialize progress for each topic
       topics.forEach(topic => {
-        const topicProblems = allProblems.filter(p => p.topic === topic);
+        const topicProblems = problems.filter(p => p.topic === topic);
         const solvedCount = topicProblems.filter(p => solvedProblems.has(p.id)).length;
         progress[topic] = {
           solved: solvedCount,
@@ -63,10 +96,19 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
       setTopicProgress(progress);
     };
     fetchSubmissions();
-  }, [user, topics]);
+  }, [user, topics, problems]);
 
-  // Apply difficulty and companies filters (already present)
-  let filteredProblems = allProblems;
+  // Apply filters
+  let filteredProblems = problems;
+  
+  // Apply search filter
+  if (filters.search) {
+    const searchTerm = filters.search.toLowerCase();
+    filteredProblems = filteredProblems.filter(
+      (p) => p.title.toLowerCase().includes(searchTerm)
+    );
+  }
+
   if (filters.difficulty !== 'all') {
     filteredProblems = filteredProblems.filter(
       (p) => p.difficulty === filters.difficulty
@@ -77,15 +119,11 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
       p.companies.some((c) => filters.companies.includes(c))
     );
   }
-
-  // Apply topics filter
   if (filters.topics.length > 0) {
     filteredProblems = filteredProblems.filter((p) =>
       filters.topics.includes(p.topic)
     );
   }
-
-  // Apply status filter
   if (filters.status !== 'all') {
     filteredProblems = filteredProblems.filter((p) => {
       const userProblemSubmissions = userSubmissions.filter(
@@ -107,11 +145,29 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
     setIsSubmitModalOpen(true);
   };
 
+  const handleDeleteProblem = (problemId: string) => {
+    if (onDeleteProblem) {
+      onDeleteProblem(problemId);
+    }
+  };
+
+  const handleAddProblem = (problem: Omit<Problem, 'id'>) => {
+    if (onAddProblem) {
+      onAddProblem(problem);
+    }
+  };
+
+  const sortProblemsByDifficulty = (problems: Problem[]) => {
+    return [...problems].sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
+  };
+
   return (
     <>
       <div className="flex flex-col gap-3">
         {topics.map((topic) => {
-          const topicProblems = filteredProblems.filter((p) => p.topic === topic);
+          const topicProblems = sortProblemsByDifficulty(
+            filteredProblems.filter((p) => p.topic === topic)
+          );
           if (topicProblems.length === 0) return null;
           
           const progress = topicProgress[topic] || { solved: 0, total: 0 };
@@ -142,7 +198,6 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
               {openTopic === topic && (
                 <div className="divide-y divide-gray-800">
                   {topicProblems.map((problem) => {
-                    // Find the latest solved submission for this problem
                     const solvedSubmissions = userSubmissions
                       .filter((s) => s.problemId === problem.id && s.status === 'Solved')
                       .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
@@ -198,6 +253,13 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
                           >
                             LeetCode
                           </a>
+                          <button
+                            onClick={() => handleDeleteProblem(problem.id)}
+                            className="p-1 rounded-lg bg-red-700 text-white hover:bg-red-600 transition"
+                            title="Delete Problem"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
                     );
@@ -209,6 +271,14 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
         })}
       </div>
 
+      <button
+        onClick={() => setIsAddModalOpen(true)}
+        className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition"
+        title="Add New Problem"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
+
       {selectedProblem && (
         <SubmitModal
           isOpen={isSubmitModalOpen}
@@ -219,6 +289,12 @@ export default function ProblemsTable({ filters }: ProblemsTableProps) {
           problem={selectedProblem}
         />
       )}
+
+      <AddProblemModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={handleAddProblem}
+      />
     </>
   );
 } 

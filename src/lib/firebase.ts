@@ -2,11 +2,15 @@
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { getFirestore, Firestore, collection } from 'firebase/firestore';
 
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
+let submissionsCollection: ReturnType<typeof collection>;
+let userProblemsCollection: ReturnType<typeof collection>;
+let problemsCollection: ReturnType<typeof collection>;
+let deletedProblemsCollection: ReturnType<typeof collection>;
 
 // Only initialize Firebase on the client side
 if (typeof window !== 'undefined') {
@@ -23,6 +27,20 @@ if (typeof window !== 'undefined') {
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   auth = getAuth(app);
   db = getFirestore(app);
+
+  // Initialize collection references
+  submissionsCollection = collection(db, 'submissions');
+  userProblemsCollection = collection(db, 'userProblems');
+  problemsCollection = collection(db, 'problems');
+  deletedProblemsCollection = collection(db, 'deletedProblems');
 }
 
-export { app, auth, db }; 
+export { 
+  app, 
+  auth, 
+  db,
+  submissionsCollection,
+  userProblemsCollection,
+  problemsCollection,
+  deletedProblemsCollection
+}; 

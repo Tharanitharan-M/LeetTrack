@@ -52,7 +52,18 @@ Your response MUST be returned in this exact JSON format:
   "patternThinkingSteps": [
     { "title": "...", "description": "..." },
     ...
-  ]
+  ],
+  "aiThoughtProcess": {
+    "codeAnalysis": "...",
+    "approachEvaluation": "...",
+    "timeComplexityAnalysis": "...",
+    "alternativeApproaches": [
+      {
+        "approach": "...",
+        "tradeoffs": "..."
+      }
+    ]
+  }
 }
 
 Please include:
@@ -68,11 +79,17 @@ Please include:
     - No long paragraphs. Use short, clear step titles and short descriptions that explain real-time thinking.
     - No academic section titles like "Understanding the Problem" or "Algorithm Design."
     - No Markdown formatting or numbering inside the text.
+- aiThoughtProcess:
+    - codeAnalysis: A detailed analysis of the submitted code, including its structure, implementation choices, and potential edge cases.
+    - approachEvaluation: An evaluation of the user's thought process and problem-solving approach.
+    - timeComplexityAnalysis: A thorough analysis of the time and space complexity, including why certain operations contribute to the overall complexity.
+    - alternativeApproaches: List of alternative approaches with their tradeoffs, helping users understand different ways to solve the same problem.
 
 Additional instructions:
 - Use a friendly, supportive tone (no harsh criticism).
 - Assume the primary coding language is Python unless otherwise stated.
 - Ensure the output JSON is syntactically correct and parsable without errors.
+- For the AI thought process, focus on explaining the reasoning behind the analysis and decisions.
 
 Submission:
 - Code: ${code}

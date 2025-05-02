@@ -1,6 +1,4 @@
-import { Problem } from '../types';
-
-export const problems: Problem[] = [
+const problems = [
   {
     id: '1',
     title: 'Contains Duplicate',
@@ -1295,4 +1293,9 @@ export const problems: Problem[] = [
     acceptanceRate: '',
     leetcodeUrl: 'https://leetcode.com/problems/evaluate-reverse-polish-notation/'
   }
-]
+];
+
+
+module.exports = {
+  problems
+};
