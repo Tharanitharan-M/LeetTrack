@@ -71,7 +71,7 @@ export default function AddProblemModal({ isOpen, onClose, onAdd }: AddProblemMo
               id="difficulty"
               className="mt-1 block w-full rounded-md border-gray-700 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               value={formData.difficulty}
-              onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, difficulty: e.target.value as 'Easy' | 'Medium' | 'Hard' })}
               required
             >
               <option value="Easy">Easy</option>
