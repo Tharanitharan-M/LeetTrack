@@ -8,6 +8,7 @@ import { doc, getDoc, collection } from 'firebase/firestore';
 import Layout from '@/components/layout/Layout';
 import { Submission, Problem, Feedback } from '@/types';
 import SubmitModal from '@/components/dashboard/SubmitModal';
+import CodeBlock from '@/components/common/CodeBlock';
 
 export default function FeedbackPage() {
   const { submissionId } = useParams();
@@ -141,9 +142,7 @@ export default function FeedbackPage() {
             </svg>
             Your Solution
           </h2>
-          <pre className="bg-gray-900/50 rounded-lg p-4 overflow-x-auto border border-gray-700">
-            <code className="text-gray-300">{submission.code}</code>
-          </pre>
+          <CodeBlock code={submission.code} language={submission.language} />
         </div>
 
         {/* Your Thought Process */}
@@ -285,9 +284,7 @@ export default function FeedbackPage() {
               {feedback.optimizedCode && (
                 <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
                   <h3 className="text-md font-medium text-blue-300 mb-2">Optimized Solution</h3>
-                  <pre className="bg-gray-800/50 rounded-lg p-4 overflow-x-auto border border-gray-700">
-                    <code className="text-gray-300">{feedback.optimizedCode}</code>
-                  </pre>
+                  <CodeBlock code={feedback.optimizedCode} language={submission.language} />
                 </div>
               )}
             </div>

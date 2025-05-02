@@ -53,6 +53,7 @@ export interface Submission {
   spaceComplexity: string;
   status: 'Solved' | 'In Progress';
   submittedAt: string;
+  language: string;
 }
 
 export interface Feedback {
