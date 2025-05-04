@@ -1,7 +1,7 @@
 // /app/api/feedback/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import OpenAI from 'openai';
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -161,6 +161,58 @@ Submission:
         submissionId,
         createdAt: Date.now(),
       });
+
+      // Get the submission to get the user ID
+      const submissionDoc = await getDoc(doc(db, 'submissions', submissionId));
+      if (!submissionDoc.exists()) {
+        throw new Error('Submission not found');
+      }
+      const submission = submissionDoc.data();
+      const userId = submission.userId;
+
+      // Get the user document
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      if (!userDoc.exists()) {
+        throw new Error('User not found');
+      }
+      const user = userDoc.data();
+
+      // Get the current date in UTC
+      const currentDate = new Date();
+      currentDate.setUTCHours(0, 0, 0, 0);
+
+      // Get the last solved date in UTC
+      const lastSolvedDate = user.lastSolvedDate ? new Date(user.lastSolvedDate) : null;
+      if (lastSolvedDate) {
+        lastSolvedDate.setUTCHours(0, 0, 0, 0);
+      }
+
+      // Calculate the difference in days
+      const dayDiff = lastSolvedDate ? 
+        Math.floor((currentDate.getTime() - lastSolvedDate.getTime()) / (1000 * 60 * 60 * 24)) : 
+        0;
+
+      // Update streak count and last solved date
+      let newStreakCount = 1;
+      if (lastSolvedDate) {
+        if (dayDiff === 1) {
+          // Consecutive day - increment streak
+          newStreakCount = (user.streakCount || 0) + 1;
+        } else if (dayDiff > 1) {
+          // Missed a day - reset streak to 1
+          newStreakCount = 1;
+        } else {
+          // Same day - keep current streak
+          newStreakCount = user.streakCount || 1;
+        }
+      }
+
+      // Update user document with new streak and last solved date
+      await setDoc(doc(db, 'users', userId), {
+        streakCount: newStreakCount,
+        lastSolvedDate: currentDate.toISOString(),
+        totalSolved: (user.totalSolved || 0) + 1,
+      }, { merge: true });
 
       // Mark the submission as solved
       await setDoc(doc(db, 'submissions', submissionId), { status: 'Solved' }, { merge: true });
