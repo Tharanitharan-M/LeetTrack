@@ -86,6 +86,9 @@ Please include:
     - alternativeApproaches: List of alternative approaches with their tradeoffs, helping users understand different ways to solve the same problem.
 
 Additional instructions:
+- DO NOT assume the code is correct just because it looks logically sound.
+- Actively check for possible edge cases or test inputs where the code might fail.
+- If the code is incorrect or incomplete, clearly mention what type of test cases it will fail and why.
 - Use a friendly, supportive tone (no harsh criticism).
 - Assume the primary coding language is Python unless otherwise stated.
 - Ensure the output JSON is syntactically correct and parsable without errors.
